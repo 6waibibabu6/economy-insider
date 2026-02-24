@@ -1,0 +1,10 @@
+
+config.py
+
+# 忽略 Python 运行缓存
+__pycache__/
+*.py[cod]
+
+# 忽略本地虚拟环境 (如果你用了 venv)
+venv/
+.env

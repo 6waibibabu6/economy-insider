@@ -1,0 +1,9 @@
+# 基础请求库
+requests>=2.31.0
+
+# 核心数据抓取 (包含依赖 pandas)
+akshare>=1.13.0
+pandas>=2.0.0
+
+# Google 最新 GenAI SDK
+google-genai>=0.3.0
