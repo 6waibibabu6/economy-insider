@@ -35,7 +35,7 @@ def get_ai_insight(metrics_data):
 def process_latest_data():
    
     # 向上跳一级找到 data 目录
-    data_pattern = os.path.join("..", "data", "*.json")
+    data_pattern = os.path.join("data", "*.json")
     list_of_files = glob.glob(data_pattern)
     
     if not list_of_files:
