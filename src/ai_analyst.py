@@ -8,30 +8,38 @@ import config
 client = genai.Client(api_key=config.GEMINI_API_KEY)
 
 def get_ai_insight(metrics_data):
-    
     prompt = f"""
     作为宏观经济专家，请分析以下数据：{json.dumps(metrics_data, ensure_ascii=False)}
-    
-    任务：请为 PMI, CPI, PPI 分别生成一段 120 字以内的锐利解读。
-    必须严格按以下 JSON 格式返回，不要包含任何其他文字或 Markdown 代码块标签：
+    任务：为 PMI, CPI, PPI 分别生成一段 120 字以内的深度解读。
+    必须返回如下格式的有效 JSON 字典：
     {{
-      "pmi": "这里只写PMI的分析...",
-      "cpi": "这里只写CPI的分析...",
-      "ppi": "这里只写PPI的分析..."
+      "pmi": "分析...",
+      "cpi": "分析...",
+      "ppi": "分析..."
     }}
+    注意：只返回 JSON，不要任何 Markdown 标签或解释文字。
     """
     
     try:
-        print(" [Gemini] 正在通过新版 SDK 研判数据...")
-        # 新版调用方式
         response = client.models.generate_content(
-        model=config.GEMINI_MODEL,
-        contents=prompt
+            model="gemini-2.0-flash",
+            contents=prompt
         )
-        return response.text
+        # 1. 拿到原始文本
+        raw_text = response.text.strip()
+        
+        # 2. 【核心加固】使用正则提取第一个 { 到最后一个 } 之间的内容
+        json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(0)
+            return json.loads(json_str)
+        else:
+            print(f"❌ [解析失败] 没在回复中找到 JSON 结构。原始输出: {raw_text[:50]}...")
+            return None
+            
     except Exception as e:
-        print(f"❌ [AI 异常] 调用失败: {e}")
-        return "当前数据解析由于技术原因暂不可用。"
+        print(f"❌ [AI 调用异常] {e}")
+        return None
 
 def process_latest_data():
    # 1. 获取当前脚本 src/ai_analyst.py 的绝对路径
