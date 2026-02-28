@@ -1,52 +1,46 @@
 import os
-import sys
 import json
 import glob
-
-# 定位项目根目录 (src 的上一级)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
-
-# 导入同目录下的模块
 import data_fetcher
 import ai_analyst
 import page_builder
 import github_pusher
 
 def start_pipeline():
-    print("=== 🏁 Economy Insider 模块化流水线启动 ===")
-    
-    # 切换当前工作目录到根目录，确保后续所有模块的文件操作（data/, index.html）路径一致
+    # 获取根目录
+    ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     os.chdir(ROOT_DIR)
-    print(f"📍 当前工作空间: {ROOT_DIR}")
-
-    # 1. 抓取数据 (内部会写到 ../data，因为 chdir 了，现在直接写 data/ 即可)
-    # 注意：如果之前的模块写死了 "../data"，建议统一改为相对 ROOT_DIR 的路径
+    
+    print("--- 🔬 开始执行验证流程 ---")
+    
+    # 步骤 1: 抓取原始数据
     raw_data = data_fetcher.get_today_data()
-    if not raw_data:
-        print("❌ 数据抓取失败。")
-        return
+    print(f"DEBUG [阶段1]: 原始数据抓取完成。是否有分析字段: {'ai_insight' in raw_data['metrics']['pmi']}")
 
-    # 2. AI 分析
+    # 步骤 2: 执行 AI 分析 (此时它会把结果写进硬盘里的 JSON)
     ai_analyst.process_latest_data()
+    print("DEBUG [阶段2]: AI 分析任务已结束。")
+
+    # 步骤 3: 【关键重写】强制从硬盘重新加载！
+    # 这一步是为了解决内存里 raw_data 还是旧数据的问题
+    latest_json = max(glob.glob(os.path.join("data", "*.json")), key=os.path.getctime)
     
-    # 3. 渲染页面
-    # 重新获取最新的 JSON
-    data_files = glob.glob(os.path.join("data", "*.json"))
-    if not data_files:
-        print("❌ 未发现可渲染的数据文件。")
-        return
+    with open(latest_json, 'r', encoding='utf-8') as f:
+        verified_data = json.load(f)
+    
+    has_ai = "ai_insight" in verified_data['metrics']['pmi']
+    print(f"DEBUG [阶段3]: 重新加载磁盘文件: {latest_json}")
+    print(f"DEBUG [阶段3]: 验证数据中是否有 AI 分析内容: {has_ai}")
+
+    if has_ai:
+        print("✅ [验证通过] 数据已同步，开始渲染 HTML...")
+        # 必须传入这个从磁盘重新读取的 verified_data
+        page_builder.build_page(verified_data)
         
-    latest_file = max(data_files, key=os.path.getctime)
-    with open(latest_file, 'r', encoding='utf-8') as f:
-        final_data = json.load(f)
-    
-    page_builder.build_page(final_data)
-
-    # 4. GitHub 推送
-    github_pusher.push_to_github()
-
-    print("=== ✨ 任务圆满完成！ ===")
+        # 步骤 4: 推送
+        github_pusher.push_to_github()
+    else:
+        print("❌ [验证失败] 磁盘文件仍未包含 AI 分析，请检查 ai_analyst.py 的保存逻辑。")
 
 if __name__ == "__main__":
     start_pipeline()

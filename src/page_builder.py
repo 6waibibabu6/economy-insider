@@ -123,7 +123,7 @@ def build_page(json_data):
 
 if __name__ == "__main__":
     # 路径处理：去上一级目录找 data
-    data_pattern = os.path.join("data", "*.json")
+    data_pattern = os.path.join("..", "data", "*.json")
     list_of_files = glob.glob(data_pattern)
     
     if list_of_files:
