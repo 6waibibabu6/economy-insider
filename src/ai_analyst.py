@@ -15,9 +15,9 @@ def get_ai_insight(metrics_data):
     任务：请为 PMI, CPI, PPI 分别生成一段 120 字以内的锐利解读。
     必须严格按以下 JSON 格式返回，不要包含任何其他文字或 Markdown 代码块标签：
     {{
-      "pmi": "PMI 相关的深度解析文字...",
-      "cpi": "CPI 相关的深度解析文字...",
-      "ppi": "PPI 相关的深度解析文字..."
+      "pmi": "这里只写PMI的分析...",
+      "cpi": "这里只写CPI的分析...",
+      "ppi": "这里只写PPI的分析..."
     }}
     """
     
