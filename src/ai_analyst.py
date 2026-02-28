@@ -33,9 +33,7 @@ def get_ai_insight(metrics_data):
         return "当前数据解析由于技术原因暂不可用。"
 
 def process_latest_data():
-    """
-    读取 JSON -> 判别是否需要 AI -> 调用并写回
-    """
+   
     # 向上跳一级找到 data 目录
     data_pattern = os.path.join("..", "data", "*.json")
     list_of_files = glob.glob(data_pattern)

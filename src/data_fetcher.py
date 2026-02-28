@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 import akshare as ak
 
-DATA_DIR = "..\\data"
+DATA_DIR = "data/"
 
 def clean_value(val, default=0.0):
     #确保数值合法，处理 None, NaN 或字符串格式
