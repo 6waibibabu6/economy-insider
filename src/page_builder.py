@@ -9,21 +9,33 @@ def generate_card_html(key, item):
     name = item.get("name", "未知指标")
     month = item.get("month", "N/A")
     
-    # 针对不同指标提取主数值
-    value = item.get("mfg") if key == "pmi" else item.get("value", 0.0)
-    # 重点：再次强制确保 yoy 不是 None
+    # 1. 提取主数值 (PMI 取 mfg, 其他取 value)
+    value_raw = item.get("mfg") if key == "pmi" else item.get("value", 0.0)
+    value = float(value_raw) if value_raw is not None else 0.0
+
+    # 2. 提取并清洗同比数据 (yoy)，防止 NoneType 比较报错
     yoy_raw = item.get("mfg_yoy") if key == "pmi" else item.get("yoy", 0.0)
     yoy = float(yoy_raw) if yoy_raw is not None else 0.0
     
-    # 动态判断颜色和图标
+    # 3. 动态判断 UI 颜色和图标
     color_class = "text-emerald-500" if yoy >= 0 else "text-rose-500"
     icon_name = "trending-up" if yoy >= 0 else "trending-down"
     
-    # yoy 展示逻辑
+    # yoy 展示逻辑 (0.0 显示为横线)
     yoy_display = f"{yoy:+.1f}%" if yoy != 0 else "--"
 
-    # AI 分析内容
-    ai_insight = item.get("ai_insight", "AI 正在深度解析该项指标的结构性变化...")
+    # 4. 获取并处理 AI 分析内容 (Markdown 转换为 HTML 简单格式)
+    raw_insight = item.get("ai_insight", "AI 正在深度解析该项指标的结构性变化...")
+    
+    # 极简 Markdown 处理：把 ** 替换为 <b>，把 \n 替换为 <br>
+    # 这样可以在不引入复杂 md 库的情况下保证格式正确
+    processed_insight = raw_insight.replace("**", "<b>").replace("</b>", "") # 简单替换开头的加粗
+    # 进阶替换：利用字符串替换实现成对加粗处理
+    while "<b>" in processed_insight:
+        processed_insight = processed_insight.replace("<b>", "<strong class='text-slate-900'>", 1).replace("<b>", "</strong>", 1)
+    
+    # 处理换行：双换行转为段落间距，单换行转为折行
+    processed_insight = processed_insight.replace("\n\n", "</p><p class='mt-3'>").replace("\n", "<br>")
 
     return f"""
     <section class="space-y-6 animate-card">
@@ -40,20 +52,21 @@ def generate_card_html(key, item):
                 <div class="space-y-1">
                     <p class="text-sm font-medium text-slate-400 uppercase tracking-widest">指标数值</p>
                     <div class="flex items-baseline gap-2">
-                        <h3 class="text-6xl font-black text-slate-800 tracking-tighter">{float(value):.1f}</h3>
+                        <h3 class="text-6xl font-black text-slate-800 tracking-tighter">{value:.1f}</h3>
                         <span class="{color_class} font-bold flex items-center text-sm">
                             <i data-lucide="{icon_name}" class="w-4 h-4 mr-1"></i> {yoy_display}
                         </span>
                     </div>
                 </div>
             </div>
+
             <div class="lg:col-span-2 glass-card p-8 rounded-3xl shadow-sm border border-white/40">
                 <div class="flex items-center gap-2 mb-4 text-blue-600">
                     <i data-lucide="sparkles" class="w-5 h-5"></i>
-                    <span class="text-sm font-bold uppercase tracking-widest">AI Analyst Perspective</span>
+                    <span class="text-sm font-bold uppercase tracking-widest text-xs">AI Analyst Perspective</span>
                 </div>
-                <article class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
-                    {ai_insight}
+                <article class="prose prose-slate max-w-none text-slate-600 leading-relaxed text-sm">
+                    <p>{processed_insight}</p>
                 </article>
             </div>
         </div>
