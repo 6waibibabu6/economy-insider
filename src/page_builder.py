@@ -1,10 +1,18 @@
 import os
 import json
 import glob
-# 获取当前脚本所在目录 (src/)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# 锁定项目根目录 (economy-insider/)
-ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+
+# 1. 获取当前脚本的绝对路径 (src/page_builder.py)
+current_script_path = os.path.abspath(__file__)
+
+# 2. 获取 src 目录
+current_dir = os.path.dirname(current_script_path)
+
+# 3. 锁定真正的项目根目录 (economy-insider)
+# 注意：只向上跳一级，确保它停在 economy-insider 文件夹
+ROOT_DIR = os.path.dirname(current_dir)
+
+print(f"📍 [路径定位] 项目根目录已锁定为: {ROOT_DIR}")
 
 def generate_card_html(key, item):
     """
@@ -121,10 +129,11 @@ def build_page(json_data):
     """
     
     # 网页生成在根目录 (src 的上一级)
-    output_path = os.path.join("..", "index.html")
+    output_path = os.path.join(ROOT_DIR, "index.html")
+    
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(template)
-    print(f"✨ [成功] index.html 已生成至根目录: {os.path.abspath(output_path)}")
+    print(f"✨ [修正成功] index.html 已生成至正确位置: {output_path}")
 
 def main_run():
     print("🎨 [渲染] 正在准备更新网页内容...")
