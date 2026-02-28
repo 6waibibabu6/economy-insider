@@ -9,15 +9,16 @@ client = genai.Client(api_key=config.GEMINI_API_KEY)
 
 def get_ai_insight(metrics_data):
     
-    # 构造更严谨的 Prompt，要求 AI 给出结构化回复
     prompt = f"""
     作为宏观经济专家，请分析以下数据：{json.dumps(metrics_data, ensure_ascii=False)}
     
-    任务：
-    1. 针对每一个指标（PMI, CPI, PPI），提供一段 120 字以内的锐利解读。
-    2. 必须包含对“同比(yoy)”或“荣枯线(50)”的走势评价。
-    3. 风格：去口水话，直击核心矛盾（如：内需疲软、工业复苏、剪刀差等）。
-    4. 不要开场白，直接输出内容。
+    任务：请为 PMI, CPI, PPI 分别生成一段 120 字以内的锐利解读。
+    必须严格按以下 JSON 格式返回，不要包含任何其他文字或 Markdown 代码块标签：
+    {{
+      "pmi": "PMI 相关的深度解析文字...",
+      "cpi": "CPI 相关的深度解析文字...",
+      "ppi": "PPI 相关的深度解析文字..."
+    }}
     """
     
     try:
@@ -33,38 +34,49 @@ def get_ai_insight(metrics_data):
         return "当前数据解析由于技术原因暂不可用。"
 
 def process_latest_data():
-   
-    # 向上跳一级找到 data 目录
-    data_pattern = os.path.join("data", "*.json")
+   # 1. 获取当前脚本 src/ai_analyst.py 的绝对路径
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # 2. 定位到父级目录（项目根目录），再进入 data 文件夹
+    data_dir = os.path.abspath(os.path.join(current_dir, "..", "data"))
+    
+    # 3. 构造完整的 glob 模式
+    data_pattern = os.path.join(data_dir, "*.json")
+    
+    print(f"🔍 [查找] 正在路径搜索数据: {data_pattern}")
+    
     list_of_files = glob.glob(data_pattern)
     
     if not list_of_files:
-        print("❌ [错误] 没找到数据文件，请先运行 data_fetcher.py")
+        print(f"❌ [错误] 没找到数据文件，请检查目录: {data_dir}")
         return
 
     latest_file = max(list_of_files, key=os.path.getctime)
     with open(latest_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    # 检查是否已包含分析，避免重复消耗额度
-    has_analysis = any("ai_insight" in item for item in data['metrics'].values())
+    # 只要有一个指标缺 AI 分析，就触发更新
+    needs_update = any("ai_insight" not in item for item in data['metrics'].values() if item.get("status") == "success")
     
-    if not has_analysis:
-        # 获取全量分析内容
-        analysis_text = get_ai_insight(data['metrics'])
+    if needs_update:
+        # 获取 AI 返回的字典： {"pmi": "...", "cpi": "...", "ppi": "..."}
+        analysis_dict = get_ai_insight(data['metrics'])
         
-        # 将分析内容分发到各个成功抓取的指标中
-        # 这里我们先采取简单策略：将整段分析同步给所有卡片，或者你可以让 AI 返回 JSON 后精准分配
-        for key in data['metrics']:
-            if data['metrics'][key]['status'] == 'success':
-                data['metrics'][key]['ai_insight'] = analysis_text
-        
-        # 持久化回 JSON
-        with open(latest_file, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-        print(f"✅ [集成完毕] AI 分析已存入: {os.path.basename(latest_file)}")
+        if analysis_dict and isinstance(analysis_dict, dict):
+            for key in data['metrics']:
+                # 精准匹配：只有当 AI 返回的 key 在我们的数据中存在时才写入
+                if key in analysis_dict:
+                    data['metrics'][key]['ai_insight'] = analysis_dict[key]
+                    print(f"✅ 已匹配指标: {key}")
+            
+            # 统一写回磁盘
+            with open(latest_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+            print(f"🚀 [成功] AI 精准分析已集成至: {os.path.basename(latest_file)}")
+        else:
+            print("⚠️ [警告] AI 未返回有效字典，跳过本次更新。")
     else:
-        print("📦 [状态] 今日数据已有 AI 分析，跳过 API 调用。")
+        print("📦 [状态] 所有指标均已有 AI 分析，无需重复调用。")
 
 if __name__ == "__main__":
     process_latest_data()

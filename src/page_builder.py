@@ -1,6 +1,10 @@
 import os
 import json
 import glob
+# 获取当前脚本所在目录 (src/)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# 锁定项目根目录 (economy-insider/)
+ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
 
 def generate_card_html(key, item):
     """
@@ -122,16 +126,34 @@ def build_page(json_data):
         f.write(template)
     print(f"✨ [成功] index.html 已生成至根目录: {os.path.abspath(output_path)}")
 
-if __name__ == "__main__":
-    # 路径处理：去上一级目录找 data
-    data_pattern = os.path.join("..", "data", "*.json")
+def main_run():
+    """
+    统一运行入口：自动查找最新数据并渲染页面
+    """
+    print("🎨 [渲染] 正在准备更新网页内容...")
+    
+    # 路径加固：确保在 src/ 下也能找到根目录的 data
+    data_dir = os.path.join(ROOT_DIR, "data")
+    data_pattern = os.path.join(data_dir, "*.json")
     list_of_files = glob.glob(data_pattern)
     
-    if list_of_files:
-        latest_file = max(list_of_files, key=os.path.getctime)
-        print(f"📖 [读取] 正在处理最新数据文件: {latest_file}")
+    if not list_of_files:
+        print(f"❌ [错误] 渲染终止：在 {data_dir} 未找到数据文件。")
+        return
+
+    # 获取最新文件并读取
+    latest_file = max(list_of_files, key=os.path.getctime)
+    print(f"📖 [读取] 正在解析数据: {os.path.basename(latest_file)}")
+    
+    try:
         with open(latest_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            build_page(data)
-    else:
-        print("❌ [错误] 未在 ../data 目录下找到任何 JSON 文件，请先运行 data_fetcher.py")
+        
+        # 调用核心构建函数
+        build_page(data)
+    except Exception as e:
+        print(f"❌ [渲染异常] {e}")
+
+# 保留原有的直接运行支持
+if __name__ == "__main__":
+    main_run()
