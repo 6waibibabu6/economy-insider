@@ -127,32 +127,34 @@ def build_page(json_data):
     print(f"✨ [成功] index.html 已生成至根目录: {os.path.abspath(output_path)}")
 
 def main_run():
-    """
-    统一运行入口：自动查找最新数据并渲染页面
-    """
     print("🎨 [渲染] 正在准备更新网页内容...")
     
-    # 路径加固：确保在 src/ 下也能找到根目录的 data
+    # 1. 确保锁定 data 目录
     data_dir = os.path.join(ROOT_DIR, "data")
     data_pattern = os.path.join(data_dir, "*.json")
     list_of_files = glob.glob(data_pattern)
     
     if not list_of_files:
-        print(f"❌ [错误] 渲染终止：在 {data_dir} 未找到数据文件。")
+        print("❌ [错误] 未发现数据文件")
         return
 
-    # 获取最新文件并读取
-    latest_file = max(list_of_files, key=os.path.getctime)
-    print(f"📖 [读取] 正在解析数据: {os.path.basename(latest_file)}")
+    # 2. 【核心点】强制使用修改时间 (mtime) 排序，确保拿到 AI 写入后的文件
+    latest_file = max(list_of_files, key=os.path.getmtime) 
+    print(f"📖 [读取] 目标文件: {os.path.basename(latest_file)}")
     
-    try:
-        with open(latest_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        # 调用核心构建函数
-        build_page(data)
-    except Exception as e:
-        print(f"❌ [渲染异常] {e}")
+    with open(latest_file, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    # 3. 【强力验证】如果发现加载的数据里还是没有 ai_insight，报错提醒
+    sample_key = 'pmi'
+    if 'ai_insight' not in data['metrics'][sample_key]:
+        print(f"⚠️ [警告] 加载的文件 {os.path.basename(latest_file)} 不包含 AI 分析字段！")
+        print("请确认 ai_analyst.py 是否成功执行了写回操作。")
+    else:
+        print(f"✅ [成功] 验证到 AI 内容，长度: {len(data['metrics'][sample_key]['ai_insight'])}")
+
+    # 执行渲染
+    build_page(data)
 
 # 保留原有的直接运行支持
 if __name__ == "__main__":
