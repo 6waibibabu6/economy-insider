@@ -103,7 +103,7 @@ def build_page(json_data):
     <style>
         @keyframes slideUp {{ from {{ opacity: 0; transform: translateY(20px); }} to {{ opacity: 1; transform: translateY(0); }} }}
         .animate-card {{ animation: slideUp 0.6s ease-out forwards; }}
-        .glass-card {{ background: rgba(255, 255, 255, 0.75); -webkit-backdrop-filter: blur(16px); }}
+        .glass-card {{ background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); }}
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans tracking-tight">
