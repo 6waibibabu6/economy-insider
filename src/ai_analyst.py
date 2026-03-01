@@ -1,6 +1,7 @@
 import os
 import json
 import glob
+import re
 from google import genai
 import config  
 
@@ -22,7 +23,7 @@ def get_ai_insight(metrics_data):
     
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model=config.GEMINI_MODEL,
             contents=prompt
         )
         # 1. 拿到原始文本
