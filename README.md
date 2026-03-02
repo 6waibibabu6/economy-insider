@@ -24,15 +24,14 @@ economy-insider/
 ├── assets/              # 静态资源（favicon等）
 ├── data/                # 历史经济指标 JSON 数据库
 ├── src/                 # 核心代码库
-│   ├── paths.py         # 路径指挥部（环境适配逻辑）
 │   ├── data_fetcher.py  # 数据抓取（Akshare 驱动）
 │   ├── ai_analyst.py    # AI 研判逻辑
 │   ├── page_builder.py  # 网页渲染引擎
 │   └── github_pusher.py # GitHub 同步模块
-├── main.py              # 调度中心 (Orchestrator)
+│   ├──  main.py              # 调度中心 (Orchestrator)
 └── requirements.txt     # 依赖清单
 ```
-##🚀 快速启动
+## 🚀 快速启动
 1. 环境准备
 ```
 Bash
@@ -46,7 +45,7 @@ pip install -r requirements.txt
 Bash
 python src/main.py
 ```
-##🛠️ 自动化部署说明
+## 🛠️ 自动化部署说明
 
 本系统通过 GitHub Actions 实现全自动运维。若需复刻，请在仓库 Settings > Secrets 中配置以下变量：
 ```
