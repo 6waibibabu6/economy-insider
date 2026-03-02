@@ -31,20 +31,25 @@ economy-insider/
 │   └── github_pusher.py # GitHub 同步模块
 ├── main.py              # 调度中心 (Orchestrator)
 └── requirements.txt     # 依赖清单
+```
 🚀 快速启动
 1. 环境准备
+```
 Bash
 git clone [https://github.com/6waibibabu6/economy-insider.git](https://github.com/6waibibabu6/economy-insider.git)
 cd economy-insider
 pip install -r requirements.txt
-2. 本地运行
+```
+1. 本地运行
 确保你已在环境变量或 config.py 中配置了 GEMINI_API_KEY：
-
+```
 Bash
-python main.py
+python src/main.py
+```
 🛠️ 自动化部署说明
 本系统通过 GitHub Actions 实现全自动运维。若需复刻，请在仓库 Settings > Secrets 中配置以下变量：
-
+```
 GEMINI_API_KEY: Google Gemini 的 API 密钥。
 
 MY_GITHUB_TOKEN: 具备 Repo 写入权限的 GitHub 个人访问令牌 (PAT)。
+```
