@@ -1,0 +1,37 @@
+name: Economy Insider Auto Update
+
+on:
+  schedule:
+    - cron: '0 4 1,15 * *' # 每月1号和15号中午12点(UTC+8)
+  workflow_dispatch:      # 支持手动点击按钮运行
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.MY_GITHUB_TOKEN }} # 在 Repo Settings -> Secrets 里设置
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python src/main.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "ActionBot"
+          git config --global user.email "bot@github.com"
+          git add .
+          git commit -m "Auto-update macro data" || echo "No changes to commit"
+          git push origin main
