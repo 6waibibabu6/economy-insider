@@ -6,7 +6,7 @@ import datetime
 # 基础路径定义 (保持原样)
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(CURRENT_DIR)
-DATA_DIR = os.path.join(ROOT_DIR, "data")
+DATA_DIR = os.path.join(CURRENT_DIR, "data")
 TEMPLATE_DIR = os.path.join(CURRENT_DIR, "templates")
 
 def load_template(name):
@@ -51,7 +51,7 @@ def generate_card_html(key, item):
     return card_tpl
 
 def build_page(json_data):
-    """组装最终页面并注入动态图表脚本"""
+    #组装最终页面并注入动态图表脚本
     main_tpl = load_template("main_template")
     
     # 1. 加载历史数据用于绘图 (确保路径正确)
@@ -156,9 +156,11 @@ def generate_seo_assets(output_dir=ROOT_DIR):
 
 def main_run():
     # (保持原样)
-    data_dir = os.path.join(ROOT_DIR, "data")
-    list_of_files = glob.glob(os.path.join(data_dir, "*.json"))
-    if not list_of_files: return
+    data_dir = os.path.join(CURRENT_DIR, "data")
+    list_of_files = glob.glob(os.path.join(data_dir, "20*.json"))
+    if not list_of_files: 
+       print("❌ 未发现日期命名的 JSON 文件")
+       return
     
     latest_file = max(list_of_files, key=os.path.getmtime)
     with open(latest_file, 'r', encoding='utf-8') as f:
