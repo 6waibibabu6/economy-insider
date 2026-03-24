@@ -47,7 +47,7 @@ def process_latest_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
     # 2. 定位到父级目录（项目根目录），再进入 data 文件夹
-    data_dir = os.path.abspath(os.path.join(current_dir, "..", "data"))
+    data_dir = os.path.abspath(os.path.join(current_dir, "data"))
     
     # 3. 构造完整的 glob 模式
     data_pattern = os.path.join(data_dir, "*.json")
