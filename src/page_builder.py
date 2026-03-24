@@ -76,8 +76,33 @@ def generate_card_html(key, item):
         card_tpl = card_tpl.replace(k, v)
     return card_tpl
 
-
-
+# 对历史数据进行转换时使用
+def transform_growth_to_index(history_data):
+    """
+    将 CPI/PPI 的增长率转换为以 100 为基准的指数。
+    如果数值已经在 100 附近（如 101.3），则保持不变。
+    """
+    processed_data = {}
+    
+    for key, records in history_data.items():
+        processed_records = []
+        for r in records:
+            # 深度拷贝，避免修改原始引用
+            new_r = r.copy()
+            val = float(r.get("value", 0.0))
+            
+            # 只有 CPI 和 PPI 需要转换，且排除掉已经是指数形式的数据（> 10 判定）
+            if key in ["cpi", "ppi"] and -10 < val < 10:
+                # 核心转换逻辑：1.3 -> 101.3; -0.9 -> 99.1
+                new_r["value"] = round(100.0 + val, 2)
+            else:
+                # PMI 本身就是指数（50基准），直接保留
+                new_r["value"] = val
+            
+            processed_records.append(new_r)
+        processed_data[key] = processed_records
+        
+    return processed_data
 
 def build_page(json_data):
     """组装最终页面并注入动态图表脚本"""
@@ -92,6 +117,9 @@ def build_page(json_data):
                 history_data = json.load(f)
             except:
                 history_data = {}
+    
+    # 对历史数据进行转换，增长率到数值的转换
+    history_data = transform_growth_to_index(history_data)
 
     # 2. 生成各指标卡片的 HTML
     metrics = json_data.get("metrics", {})
