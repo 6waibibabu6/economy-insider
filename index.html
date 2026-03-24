@@ -140,7 +140,7 @@
             new Chart(ctx_cpi, {
                 type: 'line',
                 data: {
-                    labels: ["2026\u5e7402\u6708\u4efd"], 
+                    labels: ["2026-02"], 
                     datasets: [{
                         data: [101.3],
                         borderColor: '#3b82f6',
@@ -150,7 +150,7 @@
                         pointBackgroundColor: '#3b82f6',
                         tension: 0.4,
                         fill: true,
-                        spanGaps: false // 关键：数据缺失时不强行连线，表现更专业
+                        spanGaps: false
                     }]
                 },
                 options: {
@@ -167,11 +167,11 @@
                         }
                     },
                     scales: {
-                        x: { display: false }, // 隐藏坐标轴保持简约
+                        x: { display: false },
                         y: { 
                             display: false,
                             beginAtZero: false,
-                            grace: '5%' // 给顶部留一点空隙防止线被切断
+                            grace: '5%'
                         }
                     },
                     interaction: {
@@ -188,7 +188,7 @@
             new Chart(ctx_ppi, {
                 type: 'line',
                 data: {
-                    labels: ["2026\u5e7402\u6708\u4efd"], 
+                    labels: ["2026-02"], 
                     datasets: [{
                         data: [99.1],
                         borderColor: '#3b82f6',
@@ -198,7 +198,7 @@
                         pointBackgroundColor: '#3b82f6',
                         tension: 0.4,
                         fill: true,
-                        spanGaps: false // 关键：数据缺失时不强行连线，表现更专业
+                        spanGaps: false
                     }]
                 },
                 options: {
@@ -215,11 +215,11 @@
                         }
                     },
                     scales: {
-                        x: { display: false }, // 隐藏坐标轴保持简约
+                        x: { display: false },
                         y: { 
                             display: false,
                             beginAtZero: false,
-                            grace: '5%' // 给顶部留一点空隙防止线被切断
+                            grace: '5%'
                         }
                     },
                     interaction: {
