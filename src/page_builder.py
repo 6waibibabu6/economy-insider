@@ -96,7 +96,9 @@ def build_page(json_data):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Economy Insider</title>
+    <title>立恒的数据分析站 | Economy Insider - 数据驱动的宏观内参</title>
+    <meta name="description" content="立恒的数据分析站（Economy Insider），提供 AI 驱动的宏观经济数据内参，涵盖最新的市场趋势与深度数据可视化。">
+    <meta name="keywords" content="立恒, 立场的数据小站, 经济内参, 数据分析, Economy Insider">
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -120,8 +122,11 @@ def build_page(json_data):
     <main class="max-w-7xl mx-auto px-6 pb-24 space-y-16">
         {all_cards_html}
     </main>
-    <footer class="text-center py-20 border-t border-slate-200 text-slate-300 text-[10px] uppercase tracking-[0.2em]">
-        &copy; 2026 Bjarne Yang | AI-Powered Macro Intelligence Engine
+    <footer class="text-center py-20 border-t border-slate-200 text-slate-400 text-[10px] uppercase tracking-[0.2em]">
+    <div class="mb-2 text-slate-300">
+        立恒的数据分析站 | 开发者：Bjarne Yang
+    </div>
+    &copy; 2026 Bjarne Yang | AI-Powered Macro Intelligence Engine
     </footer>
     <script>lucide.createIcons();</script>
 </body>
