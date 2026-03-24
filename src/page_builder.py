@@ -28,29 +28,38 @@ def process_ai_insight(raw_insight):
     return processed.replace("\n\n", "<br><br>").replace("\n", "<br>")
 
 def generate_card_html(key, item):
-    """生成单个指标卡片的 HTML"""
     card_tpl = load_template("card_template")
     
-    # 1. 提取原始数值
+    # 提取数值
     val_raw = float(item.get("mfg" if key == "pmi" else "value", 0.0))
     yoy_raw = float(item.get("mfg_yoy" if key == "pmi" else "yoy", 0.0))
     
-    # 2. 状态判定：如果数值为 0，视为暂无数据
-    is_data_ready = val_raw != 0.0
+    # --- 核心逻辑区分 ---
+    # 只要数值不为 0，就代表“已获取数据”
+    is_data_fetched = (val_raw != 0.0)
     
-    # 3. 动态计算映射值
-    if is_data_ready:
+    if is_data_fetched:
         display_value = f"{val_raw:.1f}"
-        yoy_display = f"{yoy_raw:+.1f}%" if yoy_raw != 0 else "--"
-        # 正常涨跌颜色与图标
-        color_class = "text-emerald-500" if yoy_raw >= 0 else "text-rose-500"
-        icon_name = "trending-up" if yoy_raw >= 0 else "trending-down"
+        yoy_display = f"{yoy_raw:+.1f}%"
+        
+        # 处理增长率为 0 的“持平”情况
+        if yoy_raw > 0:
+            color_class = "text-emerald-500"
+            icon_name = "trending-up"
+        elif yoy_raw < 0:
+            color_class = "text-rose-500"
+            icon_name = "trending-down"
+        else:
+            # 增长率为 0，显示灰色持平图标
+            color_class = "text-slate-400" 
+            icon_name = "minus" 
+            yoy_display = "0.0% (持平)"
     else:
-        # 数据缺失状态
+        # 彻底没拿到数据的情况
         display_value = "暂未获取"
         yoy_display = "--"
-        color_class = "text-slate-300"  # 变灰色
-        icon_name = "minus-circle"      # 改为圆点或横杠图标
+        color_class = "text-slate-300"
+        icon_name = "circle-dashed"
 
     mappings = {
         "{{KEY}}": key,
@@ -66,6 +75,9 @@ def generate_card_html(key, item):
     for k, v in mappings.items():
         card_tpl = card_tpl.replace(k, v)
     return card_tpl
+
+
+
 
 def build_page(json_data):
     """组装最终页面并注入动态图表脚本"""
@@ -142,10 +154,11 @@ def build_page(json_data):
         clean_labels = []
         clean_values = []
         for r in records:
-            # 将 "2026年02月份" 统一清洗为 "2026-02"
             m = str(r['month']).replace("年", "-").replace("月份", "").replace("月", "").strip()
             clean_labels.append(m)
-            val = r['value']
+            
+            val = r.get('value', 0.0)
+            # 只有数值不为 0 时才绘点，否则设为 null 跳过（保持折线连续性视 spanGaps 而定）
             clean_values.append(val if val != 0 else None)
         
         chart_scripts += f"""
@@ -161,37 +174,20 @@ def build_page(json_data):
                         borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.05)',
                         borderWidth: 2,
-                        pointRadius: 3,
-                        pointBackgroundColor: '#3b82f6',
                         tension: 0.4,
                         fill: true,
-                        spanGaps: false
+                        spanGaps: true // 建议开启，这样中间缺失月份会自动连线，不会断开
                     }}]
                 }},
                 options: {{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {{
-                        legend: {{ display: false }},
-                        tooltip: {{
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                            titleFont: {{ size: 10 }},
-                            bodyFont: {{ size: 12 }}
-                        }}
-                    }},
+                    // ... 保持之前的 responsive 和 plugins 配置 ...
                     scales: {{
                         x: {{ display: false }},
                         y: {{ 
                             display: false,
-                            beginAtZero: false,
-                            grace: '5%'
+                            beginAtZero: false, // 核心：不从0开始，这样数值微小波动在图上更明显
+                            grace: '5%',      // 给顶部留出一点空间                            
                         }}
-                    }},
-                    interaction: {{
-                        intersect: false,
-                        mode: 'index',
                     }}
                 }}
             }});
