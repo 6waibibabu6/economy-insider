@@ -1,7 +1,7 @@
 import os
 import json
 import glob
-
+import datetime
 # 1. 获取当前脚本的绝对路径 (src/page_builder.py)
 current_script_path = os.path.abspath(__file__)
 
@@ -140,6 +140,32 @@ def build_page(json_data):
         f.write(template)
     print(f"✨ [修正成功] index.html 已生成至正确位置: {output_path}")
 
+
+#生成 Sitemap 和 Robots.txt
+def generate_seo_assets(output_dir="."):
+    base_url = "https://data.ylh.top/"
+    now = datetime.datetime.now().strftime("%Y-%m-%d")
+    # 生成 sitemap.xml
+    sitemap_path = os.path.join(output_dir, "sitemap.xml")
+    with open(sitemap_path, "w", encoding="utf-8") as f:
+        f.write(f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>{base_url}</loc>
+    <lastmod>{now}</lastmod>
+    <priority>1.0</priority>
+  </url>
+</urlset>""")
+
+    # 生成 robots.txt (告诉 Bing 你的地盘规则)
+    robots_path = os.path.join(output_dir, "robots.txt")
+    with open(robots_path, "w", encoding="utf-8") as f:
+        f.write(f"User-agent: *\nAllow: /\n\nSitemap: {base_url}sitemap.xml")
+    print("✅ SEO 资产（Sitemap/Robots）已同步更新")
+
+
+
+
 def main_run():
     print("🎨 [渲染] 正在准备更新网页内容...")
     
@@ -169,6 +195,9 @@ def main_run():
 
     # 执行渲染
     build_page(data)
+    #执行SEO资产生成
+    generate_seo_assets()
+    
 
 # 保留原有的直接运行支持
 if __name__ == "__main__":

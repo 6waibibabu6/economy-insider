@@ -1,0 +1,26 @@
+{
+    "update_time": "2026-03-24",
+    "metrics": {
+        "pmi": {
+            "name": "采购经理指数",
+            "month": "N/A",
+            "mfg": 0.0,
+            "non_mfg": 0.0,
+            "status": "fail"
+        },
+        "cpi": {
+            "name": "居民消费价格指数",
+            "month": "2026年02月份",
+            "value": 101.3,
+            "yoy": 1.3,
+            "status": "success"
+        },
+        "ppi": {
+            "name": "工业生产者出厂价格指数",
+            "month": "2026年02月份",
+            "value": 99.1,
+            "yoy": 0.0,
+            "status": "success"
+        }
+    }
+}
