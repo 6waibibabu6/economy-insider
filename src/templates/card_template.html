@@ -1,0 +1,45 @@
+<div class="grid grid-cols-12 gap-6 mb-12 animate-card">
+    <div class="col-span-12 xl:col-span-8 bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+        <div class="flex justify-between items-center mb-10">
+            <h4 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <span class="w-2 h-6 bg-blue-600 rounded-full"></span>
+                {{NAME}} ({{MONTH}})
+            </h4>
+            <div class="flex gap-4 items-center">
+                <span class="px-3 py-1 bg-slate-50 text-slate-400 text-[10px] font-black rounded-full uppercase">Live Metrics</span>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Current Value</p>
+                <div class="flex items-baseline gap-3">
+                    <h3 class="text-6xl font-black text-slate-900 tracking-tighter">{{VALUE}}</h3>
+                    <span class="{{COLOR_CLASS}} font-bold text-sm flex items-center">
+                        <i data-lucide="{{ICON_NAME}}" class="w-4 h-4 mr-1"></i> {{YOY_DISPLAY}}
+                    </span>
+                </div>
+            </div>
+            <div class="h-32 w-full pb-2">
+                <canvas id="chart-{{KEY}}"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-span-12 xl:col-span-4">
+        <div class="bg-blue-50 p-8 rounded-2xl h-full relative overflow-hidden group border-l-4 border-blue-200">
+            <div class="relative z-10">
+                <div class="flex items-center gap-2 mb-4 text-blue-600">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    <h5 class="text-[10px] font-black uppercase tracking-[0.2em]">Analyst Perspective</h5>
+                </div>
+                <div class="prose prose-blue max-w-none">
+                    <p class="text-blue-950 text-sm leading-relaxed font-medium">
+                        {{AI_INSIGHT}}
+                    </p>
+                </div>
+            </div>
+            <div class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#bfdbfe_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        </div>
+    </div>
+</div>
